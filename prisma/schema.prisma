@@ -1,0 +1,108 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// =======================================
+// MODEL SESUAI CLASS DIAGRAM BAB V
+// =======================================
+
+// 1. Tabel User (Induk akun)
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  password    String
+  role        Role     // Enum: PELAMAR, UMKM, ADMIN
+  created_at  DateTime @default(now())
+
+  otp_code       String?   // Menyimpan kode 6 digit
+  otp_expires_at DateTime? // Menyimpan waktu expired
+
+  // Relasi
+  pelamar     Pelamar?
+  umkm        Umkm?
+}
+
+// 2. Tabel Pelamar
+model Pelamar {
+  id                Int      @id @default(autoincrement())
+  userId            Int      @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  nama_lengkap      String
+  no_hp             String?
+  jenis_kelamin     String?
+  pendidikan_akhir  String?
+  skill             String?  @db.Text
+  foto_profil       String?
+  cv_file           String?  // Link ke file CV
+  
+  lamaran           Lamaran[] // Pelamar bisa punya banyak lamaran
+}
+
+// 3. Tabel UMKM
+model Umkm {
+  id           Int        @id @default(autoincrement())
+  userId       Int        @unique
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  nama_usaha   String
+  pemilik      String
+  alamat       String     @db.Text
+  deskripsi    String?    @db.Text
+  logo         String?
+
+  lowongan     Lowongan[] // UMKM bisa punya banyak lowongan
+}
+
+// 4. Tabel Lowongan
+model Lowongan {
+  id             Int       @id @default(autoincrement())
+  umkmId         Int
+  umkm           Umkm      @relation(fields: [umkmId], references: [id], onDelete: Cascade)
+  
+  judul          String
+  deskripsi      String    @db.Text
+  gaji           Int?
+  tipe_pekerjaan String?   // Part-time, Freelance, dll
+  status         StatusJob @default(OPEN)
+  created_at     DateTime  @default(now())
+
+  lamaran        Lamaran[]
+}
+
+// 5. Tabel Lamaran (Penghubung Pelamar & Lowongan)
+model Lamaran {
+  id             Int           @id @default(autoincrement())
+  lowonganId     Int
+  lowongan       Lowongan      @relation(fields: [lowonganId], references: [id], onDelete: Cascade)
+  pelamarId      Int
+  pelamar        Pelamar       @relation(fields: [pelamarId], references: [id], onDelete: Cascade)
+  
+  status         StatusLamaran @default(APPLIED)
+  tanggal_lamar  DateTime      @default(now())
+}
+
+// ENUMS (Pilihan Terbatas)
+enum Role {
+  ADMIN
+  PELAMAR
+  UMKM
+}
+
+enum StatusJob {
+  OPEN
+  CLOSED
+}
+
+enum StatusLamaran {
+  APPLIED   // Baru melamar
+  ACCEPTED  // Diterima
+  REJECTED  // Ditolak
+}
