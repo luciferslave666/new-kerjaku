@@ -105,11 +105,3 @@ Irfan Putra Hendari (10123021)
 Egy Audiawan Riyadi (10123026)
 Zaki Rahmat Nugroho (10123033)
 Arif Hardyansyah (10123042)
-Dibuat dengan ❤️ menggunakan Next.js & Prisma
-code
-Code
-### Tips Tambahan:
-Jika Anda ingin menambahkan screenshot aplikasi ke README agar lebih keren:
-1.  Screenshot halaman Dashboard atau Landing Page.
-2.  Simpan gambarnya di folder `public/docs/screenshot.png`.
-3.  Tambahkan kode ini di README: `![Screenshot Aplikasi](/docs/screenshot.png)`
